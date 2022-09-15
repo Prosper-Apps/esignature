@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include esignature *.css
+recursive-include esignature *.csv
+recursive-include esignature *.html
+recursive-include esignature *.ico
+recursive-include esignature *.js
+recursive-include esignature *.json
+recursive-include esignature *.md
+recursive-include esignature *.png
+recursive-include esignature *.py
+recursive-include esignature *.svg
+recursive-include esignature *.txt
+recursive-exclude esignature *.pyc
