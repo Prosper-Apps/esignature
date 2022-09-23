@@ -11,6 +11,9 @@ class transientDocuments(AdobeBase):
 		})
 
 	def post(self, files):
+		"""
+		files: [("File", frappe.get_doc("File", filename).get_content())]
+		"""
 		url = self.api_url + "/api/rest/v6/transientDocuments"
 		response = requests.post(url, headers=self.headers, files=files)
 
