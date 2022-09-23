@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2022-09-23 12:03:51.310407",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "agreement_name",
+  "user",
+  "status",
+  "files",
+  "users",
+  "transient_documents_id",
+  "agreement_id"
+ ],
+ "fields": [
+  {
+   "default": "SIGN-AGREE-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "SIGN-AGREE-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "files",
+   "fieldtype": "Table",
+   "label": "Files",
+   "options": "Adobe Sign Agreement Files"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nAuthoring\nIn Process"
+  },
+  {
+   "fieldname": "transient_documents_id",
+   "fieldtype": "Small Text",
+   "label": "Transient Documents ID",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "agreement_name",
+   "fieldtype": "Data",
+   "label": "Agreement Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "users",
+   "fieldtype": "Table",
+   "label": "Users",
+   "options": "Adobe Sign Agreement Users"
+  },
+  {
+   "fieldname": "agreement_id",
+   "fieldtype": "Small Text",
+   "label": "Agreement ID",
+   "no_copy": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-09-23 13:39:03.099099",
+ "modified_by": "Administrator",
+ "module": "eSignature",
+ "name": "Adobe Sign Agreement",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

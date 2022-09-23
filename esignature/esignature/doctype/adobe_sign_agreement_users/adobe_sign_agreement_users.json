@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-09-23 12:17:45.363123",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "order",
+  "email",
+  "role"
+ ],
+ "fields": [
+  {
+   "fieldname": "order",
+   "fieldtype": "Int",
+   "label": "Order"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "options": "Email",
+   "reqd": 1
+  },
+  {
+   "default": "SIGNER",
+   "fieldname": "role",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Role",
+   "options": "SIGNER\nAPPROVER\nACCEPTOR\nCERTIFIED_RECIPIENT\nFORM_FILLER\nDELEGATE_TO_SIGNER\nDELEGATE_TO_APPROVER\nDELEGATE_TO_ACCEPTOR\nDELEGATE_TO_CERTIFIED_RECIPIENT\nDELEGATE_TO_FORM_FILLER\nSHARE\nNOTARY_SIGNER\nELECTRONIC_SEALER",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-09-23 12:18:30.287821",
+ "modified_by": "Administrator",
+ "module": "eSignature",
+ "name": "Adobe Sign Agreement Users",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

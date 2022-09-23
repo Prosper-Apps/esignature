@@ -3,8 +3,8 @@ import requests
 from esignature.api.base import AdobeBase
 
 class Widget(AdobeBase):
-	def __init__(self):
-		super(Widget, self).__init__()
+	def __init__(self, user=None):
+		super(Widget, self).__init__(user)
 
 
 		self.url = self.api_url + "/api/rest/v6/widgets"
@@ -26,12 +26,11 @@ class Widget(AdobeBase):
 		"""
 
 		response = requests.post(self.url, headers=self.headers, data=json.dumps(data))
-
 		return response.json()
 
 	def get_widget(self, id):
-		self.url = f"{self.url}/{id}"
-		response = requests.get(self.url, headers=self.headers)
+		url = f"{self.url}/{id}"
+		response = requests.get(url, headers=self.headers)
 
 		return response.json()
 

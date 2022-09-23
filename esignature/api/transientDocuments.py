@@ -3,8 +3,8 @@ import requests
 from esignature.api.base import AdobeBase
 
 class transientDocuments(AdobeBase):
-	def __init__(self):
-		super(transientDocuments, self).__init__()
+	def __init__(self, user=None):
+		super(transientDocuments, self).__init__(user)
 
 		self.headers.update({
 			'Content-Disposition': 'form-data; name=";File"; filename=testfile.pdf',
