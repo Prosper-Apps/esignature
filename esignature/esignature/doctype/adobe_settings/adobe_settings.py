@@ -29,7 +29,7 @@ class AdobeSettings(Document):
 		parameters = {
 			"provider_name": "Adobe Sign",
 			"client_id": self.application_code,
-			"client_secret": self.get_password("application_secret"),
+			"client_secret": self.get_password("application_secret", raise_exception=False),
 			"scopes": [],
 			"authorization_uri": f"{self.base_uri}/public/oauth/v2",
 			"token_uri": f"{self.base_uri}/oauth/v2/token"
