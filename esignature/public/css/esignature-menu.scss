@@ -1,0 +1,11 @@
+.esignature-menu--signed-item {
+	margin-bottom: var(--margin-sm);
+	max-width: 100%;
+}
+
+.esignature-menu--signed-item .data-pill {
+	/* background-color: var(--control-bg-on-gray); */
+	background-color: var(--bg-green);
+	box-shadow: none;
+}
+

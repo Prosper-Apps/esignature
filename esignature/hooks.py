@@ -11,8 +11,8 @@ app_license = "GNU GPLv3"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/esignature/css/esignature.css"
-# app_include_js = "/assets/esignature/js/esignature.js"
+app_include_css = "esignature.bundle.css"
+app_include_js = "esignature.bundle.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/esignature/css/esignature.css"
