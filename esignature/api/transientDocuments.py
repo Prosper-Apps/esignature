@@ -1,20 +1,34 @@
 import requests
+from mimetypes import guess_type
+
+import frappe
+from frappe import _
 
 from esignature.api.base import AdobeBase
 
 class transientDocuments(AdobeBase):
-	def __init__(self, user=None):
-		super(transientDocuments, self).__init__(user)
+	def post(self, file):
+		"""
+		files: a File document
+		"""
+
+		file_type = guess_type(file.file_name)
+		if not file_type[0]:
+			frappe.throw(_("Invalid file"))
+
+		files = {
+			"File": (file.file_name, open(file.get_full_path(),'rb'), file_type[0])
+		}
 
 		self.headers.update({
-			'Content-Disposition': 'form-data; name=";File"; filename=testfile.pdf',
+			'Content-Disposition': f'form-data; name=";File"; filename={file.file_name}'
 		})
 
-	def post(self, files):
-		"""
-		files: [("File", frappe.get_doc("File", filename).get_content())]
-		"""
-		url = self.api_url + "/api/rest/v6/transientDocuments"
-		response = requests.post(url, headers=self.headers, files=files)
+		url = self.api_url + "api/rest/v6/transientDocuments"
+		response = requests.post(
+			url,
+			headers=self.headers,
+			files=files
+		)
 
 		return response.json()

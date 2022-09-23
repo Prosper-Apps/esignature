@@ -16,29 +16,31 @@ class AdobeSignAgreement(Document):
 		# TODO: add exception handler, especially for external links
 		client = transientDocuments(self.user)
 
-		transient_files = []
 		for file in self.files:
-			content = frappe.get_doc("File", file.file).get_content()
-			if content:
-				transient_files.append(
-					("File", content)
-				)
-		response = client.post(transient_files)
+			file_doc = frappe.get_doc("File", file.file)
+			response = client.post(file_doc)
 
-		if response.get("transientDocumentId"):
-			self.db_set("transient_documents_id", response.get("transientDocumentId"))
+			if response.get("transientDocumentId"):
+				file.db_set("transient_documents_id", response.get("transientDocumentId"))
 
 	def create_agreement(self):
 		agreement_data = {
 			"name": self.agreement_name,
 			"senderEmail": self.user,
-			"fileInfos": [{
-				"transientDocumentId": self.transient_documents_id
-			}],
+			"fileInfos": [],
 			"participantSetsInfo": [],
-			"state": "AUTHORING",
+			"state": "IN_PROCESS",
 			"signatureType": "ESIGN"
 		}
+
+		for file in self.files:
+			if file.transient_documents_id:
+				agreement_data["fileInfos"].append({
+					"transientDocumentId": file.transient_documents_id
+				})
+
+		if not agreement_data["fileInfos"]:
+			return
 
 		for user in self.users:
 			agreement_data["participantSetsInfo"].append({
@@ -51,6 +53,11 @@ class AdobeSignAgreement(Document):
 				"role": user.role,
 				"order": 1
 			})
+
+		if not agreement_data["participantSetsInfo"]:
+			return
+
+		print(agreement_data)
 
 		client = Agreement(self.user)
 		response = client.post(agreement_data)
