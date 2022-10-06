@@ -13,7 +13,8 @@
   "status",
   "files",
   "users",
-  "agreement_id"
+  "agreement_id",
+  "signed_agreement_url"
  ],
  "fields": [
   {
@@ -40,14 +41,16 @@
    "options": "Adobe Sign Agreement Files"
   },
   {
+   "default": "DRAFT",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Draft\nAuthoring\nIn Process"
+   "options": "OUT_FOR_SIGNATURE\nOUT_FOR_DELIVERY\nOUT_FOR_ACCEPTANCE\nOUT_FOR_FORM_FILLING\nOUT_FOR_APPROVAL\nAUTHORING\nCANCELLED\nSIGNED\nAPPROVED\nDELIVERED\nACCEPTED\nFORM_FILLED\nEXPIRED\nARCHIVED\nPREFILL\nWIDGET_WAITING_FOR_VERIFICATION\nDRAFT\nDOCUMENTS_NOT_YET_PROCESSED\nWAITING_FOR_FAXIN\nWAITING_FOR_VERIFICATION\nWAITING_FOR_NOTARIZATION"
   },
   {
    "fieldname": "agreement_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Agreement Name",
    "reqd": 1
   },
@@ -61,12 +64,20 @@
    "fieldname": "agreement_id",
    "fieldtype": "Small Text",
    "label": "Agreement ID",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "signed_agreement_url",
+   "fieldtype": "Small Text",
+   "label": "Signed Agreement URL",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-23 14:35:21.211993",
+ "modified": "2022-10-06 18:46:05.907132",
  "modified_by": "Administrator",
  "module": "eSignature",
  "name": "Adobe Sign Agreement",

@@ -72,6 +72,8 @@ app_include_js = "esignature.bundle.js"
 # before_uninstall = "esignature.uninstall.before_uninstall"
 # after_uninstall = "esignature.uninstall.after_uninstall"
 
+boot_session = "esignature.boot.get_bootinfo"
+
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config

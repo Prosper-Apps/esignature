@@ -100,7 +100,9 @@ class ESignatureMenu {
 		const attachments = this.frm.attachments.get_attachments()
 		const title = __("Request eSignature")
 		const fields = this.get_modal_fields()
-		const primary_action = (values) => console.log({values})
+		const primary_action = (values) => {
+			this.create_an_agreement(values)
+		}
 		const primary_action_label = __("Request eSignature")
 		const dialog = new frappe.ui.Dialog({
 			title,
@@ -116,7 +118,15 @@ class ESignatureMenu {
 
 	get_modal_fields() {
 		const me = this
+
 		return [
+			{
+				label: __("Agreement Name"),
+				fieldname: "agreement_name",
+				fieldtype: "Data",
+				reqd: 1,
+			},
+			{ fieldtype: "Section Break" },
 			{
 				label: __("Files"),
 				fieldname: "files",
@@ -127,7 +137,8 @@ class ESignatureMenu {
 					value: a.name,
 				})),
 				// TODO: make all checkboxes checked by default
-				// IDEA: add "Un/Check all" buttons?
+				// IDEA: add "Un/Check all" buttons? => Yes
+				// IDEA: add a third button: Upload a file
 			},
 			/* {
 				label: __("Files"),
@@ -149,6 +160,9 @@ class ESignatureMenu {
 				options: "Adobe Sign Agreement Users",
 				fields: frappe.meta.get_docfields("Adobe Sign Agreement Users")
 					.filter(df => df.fieldname === "email" || df.fieldname === "role"),
+
+				// IDEA: add a button 'select a user' OR  add autocompletion on email addresses
+				// TODO: Make SIGNER role default (a bug in the framework ?)
 			},
 		]
 	}
@@ -169,30 +183,58 @@ class ESignatureMenu {
 			};
 		});
 	}
+
+	create_an_agreement(values) {
+		console.log(values)
+		return frappe.call({
+			method: "frappe.client.insert",
+			args: {
+				doc: {
+					doctype: "Adobe Sign Agreement",
+					agreement_name: values.agreement_name,
+					user: frappe.session.user,
+					files: values.files.map(f => {
+						return {
+							file: f
+						}
+					}),
+					users: values.signers
+				}
+			},
+		}).then(() => {
+			this.dialog.hide()
+			frappe.show_alert({
+				message: __("eSignature Request sent. Please check your email Inbox."),
+				indicator: 'green'
+			})
+		})
+	}
 }
 
 $(document).ready(() => {
 	class ESignatureSidebar extends frappe.ui.form.Sidebar {
-		make_attachments(...args) {
-			const out = super.make_attachments(...args)
-			this.frm.esignature_menu = new ESignatureMenu({
-				frm: this.frm,
-				sidebar: this.sidebar,
-			})
-			return out
+		make_attachments() {
+			super.make_attachments()
+
+			if (frappe.boot.adobe_sign_enabled == "1") {
+				this.frm.esignature_menu = new ESignatureMenu({
+					frm: this.frm,
+					sidebar: this.sidebar,
+				})
+			}
 		}
 
 		reload_docinfo(callback) {
 			const cb = (...args) => {
 				callback(...args)
-				this.frm.esignature_menu.refresh()
+				this.frm.esignature_menu && this.frm.esignature_menu.refresh()
 			}
 			return super.reload_docinfo(cb)
 		}
 
 		refresh() {
 			super.refresh()
-			this.frm.esignature_menu.refresh()
+			this.frm.esignature_menu && this.frm.esignature_menu.refresh()
 		}
 	}
 

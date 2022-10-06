@@ -41,7 +41,7 @@
    "mandatory_depends_on": "eval:doc.enable_adobe_sign"
   },
   {
-   "default": "https://secure.eu1.adobesign.com/public/oauth/v2",
+   "default": "https://secure.eu1.adobesign.com",
    "depends_on": "eval:doc.enable_adobe_sign",
    "description": "The Acrobat Sign endpoint",
    "fieldname": "base_uri",

@@ -4,6 +4,9 @@
 import frappe
 from frappe.model.document import Document
 
+from esignature.api.base import AdobeBase
+from esignature.api.webhook import Webhook
+
 _SCOPES = [
 	"user_read:account",
 	"user_write:account",
@@ -16,13 +19,20 @@ _SCOPES = [
 	"library_read:account",
 	"library_write:account",
 	"workflow_read:account",
-	"workflow_write:account"
+	"workflow_write:account",
+	"webhook_read:account",
+	"webhook_write:account"
 ]
 
 # TODO: Register api_access_point and web_access_point returned during authorization flow
 
+AGREEMENT_ALL = [
+	"AGREEMENT_ALL"
+]
+AGREEMENT_WEBHOOK_URL = "/api/method/esignature.api.webhook.adobe_webhooks"
+
 class AdobeSettings(Document):
-	def on_update(self):
+	def validate(self):
 		connected_app = frappe.get_doc("Connected App", self.connected_application) if self.connected_application else frappe.new_doc("Connected App")
 
 
@@ -45,5 +55,30 @@ class AdobeSettings(Document):
 		connected_app.save()
 
 		if not self.connected_application:
-			self.db_set("connected_application", connected_app.name)
-		self.db_set("redirect_uri", connected_app.redirect_uri)
+			self.connected_application = connected_app.name
+
+		self.redirect_uri = connected_app.redirect_uri
+
+
+	@frappe.whitelist()
+	def create_webhooks(self):
+		# "problemNotificationEmails": frappe.session.user if frappe.session.user != "Administrator" else "",
+		data = {
+			"name": "dokos_esignature_all_agreement_webhook",
+			"scope": "ACCOUNT",
+			"state": "ACTIVE",
+			"webhookSubscriptionEvents": AGREEMENT_ALL,
+			"webhookUrlInfo": {
+				"url": frappe.utils.get_url(AGREEMENT_WEBHOOK_URL)
+			},
+			"applicationDisplayName": frappe.get_website_settings("app_name") or "Dokos eSignature",
+			"applicationName": "dokos_esignature",
+		}
+
+		adobe_webhook = Webhook()
+		return adobe_webhook.create(data)
+
+	@frappe.whitelist()
+	def revoke_token(self):
+		connection = AdobeBase()
+		return connection.revoke_access_token()

@@ -45,3 +45,13 @@ class Agreement(AdobeBase):
 		response = requests.post(self.url, headers=self.headers, data=json.dumps(data))
 
 		return response.json()
+
+	def get_combined_documents(self, id):
+		url = f"{self.url}/{id}/combinedDocument"
+		response = requests.get(url, headers=self.headers, stream=True)
+		return response.content
+
+	def get_combined_documents_url(self, id):
+		url = f"{self.url}/{id}/combinedDocument/url"
+		response = requests.get(url, headers=self.headers)
+		return response.json()
