@@ -56,29 +56,31 @@ class ESignatureMenu {
 		if (!this.can_be_shown()) {
 			this.destroy()
 		}
-
 		// Update agreement URL
 		// 1. Get URL
-		const signed_agreement_url = await this.get_signed_agreement_url()
+		const attachments = this.frm.attachments.get_attachments().map(a => a.name)
+		const signed_agreements = await this.get_signed_agreement_url(attachments)
 
 		// 2. Remove previous URL
 		this.$menu.find(".esignature-menu--agreement-url").remove()
 
 		// 3. Show the new URL
-		this.$agreement_url = $("<a>")
-			.attr("href", signed_agreement_url)
-			.css("word-break", "break-all")
-			.text(signed_agreement_url)
-			.wrap("<li></li>").parent()
-			.addClass("esignature-menu--agreement-url")
-			.addClass("pb-4")
-			.insertAfter(this.$header)
-
+		signed_agreements.map((signed_agreement) => {
+			$(`<li class="esignature-menu--agreement-url">`)
+			.append(
+				frappe.get_data_pill(
+					`<a href=${signed_agreement.signed_agreement_url} target="_blank">${signed_agreement.agreement_name}</a>`,
+					null,
+					null,
+					null
+				)
+			)
+			.insertAfter(this.$header);
+		})
 
 		// Update signed items
 		// 1. Get all signed items
-		const item_names = this.frm.attachments.get_attachments().map(a => a.name)
-		const signed_items = await this.list_signed_items_for(item_names)
+		const signed_items = await this.list_signed_items_for(attachments)
 
 		// 2. Remove previous buttons
 		this.$menu.find(".esignature-menu--signed-item").remove()
@@ -93,14 +95,10 @@ class ESignatureMenu {
 		})
 	}
 
-	async get_signed_agreement_url() {
-		// const args = {
-		// 	doctype: this.frm.doctype,
-		// 	docname: this.frm.docname,
-		// }
-		// const agreement = await frappe.xcall("esignature.esignature.api.get_agreement_for_doc", args)
-		// return agreement.signed_agreement_url
-		return "https://example.com/lorem-ipsum-dolor-sit-amet-consectetur-adipiscing-elit"
+	async get_signed_agreement_url(attachments) {
+		return await frappe.xcall("esignature.esignature.doctype.adobe_sign_agreement.adobe_sign_agreement.get_agreements_for_attachments",
+			{attachments: attachments}
+		)
 	}
 
 	async list_signed_items_for(file_names) {

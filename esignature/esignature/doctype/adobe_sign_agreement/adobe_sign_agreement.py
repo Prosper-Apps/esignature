@@ -78,7 +78,7 @@ class AdobeSignAgreement(Document):
 	@frappe.whitelist()
 	def update_status(self):
 		data = self.get_agreement()
-		if data.get("status"):
+		if data.get("status") and data.get("status") != self.status:
 			self.db_set("status", data.get("status"))
 
 	@frappe.whitelist()
@@ -86,3 +86,14 @@ class AdobeSignAgreement(Document):
 		client = Agreement(self.user)
 		response = client.get_combined_documents_url(self.agreement_id)
 		self.db_set("signed_agreement_url", response.get("url"))
+
+@frappe.whitelist()
+def get_agreements_for_attachments(attachments):
+	return frappe.get_list("Adobe Sign Agreement",
+		filters=[
+			["Adobe Sign Agreement Files", "file", "in", frappe.parse_json(attachments)],
+			["Adobe Sign Agreement", "signed_agreement_url", "is", "set"]
+		],
+		fields=["name", "agreement_name", "signed_agreement_url"],
+		distinct=1
+	)

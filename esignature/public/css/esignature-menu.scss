@@ -9,3 +9,16 @@
 	box-shadow: none;
 }
 
+.esignature-menu--agreement-url {
+	margin-bottom: var(--margin-sm);
+	max-width: 100%;
+
+	.data-pill {
+		background-color: var(--yellow-300);
+		box-shadow: none;
+	}
+
+	a {
+		color: var(--yellow-50);
+	}
+}
