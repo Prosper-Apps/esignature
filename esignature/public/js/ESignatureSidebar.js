@@ -127,12 +127,12 @@ class ESignatureMenu {
 
 	async open_request_modal() {
 		const attachments = this.frm.attachments.get_attachments()
-		const title = __("Request eSignature")
+		const title = __("Request an eSignature")
 		const fields = this.get_modal_fields()
 		const primary_action = (values) => {
 			this.create_an_agreement(values)
 		}
-		const primary_action_label = __("Request eSignature")
+		const primary_action_label = __("Request an eSignature")
 		this.dialog = new frappe.ui.Dialog({
 			title,
 			fields,
@@ -149,13 +149,6 @@ class ESignatureMenu {
 		const attachments = this.frm.attachments.get_attachments()
 
 		return [
-			{
-				label: __("Agreement Name"),
-				fieldname: "agreement_name",
-				fieldtype: "Data",
-				reqd: 1,
-			},
-			{ fieldtype: "Section Break" },
 			{
 				fieldname: "add-file-btn",
 				fieldtype: "Button",
@@ -194,6 +187,13 @@ class ESignatureMenu {
 							return df
 						}
 					}),
+			},
+			{ fieldtype: "Section Break" },
+			{
+				label: __("Agreement Name"),
+				fieldname: "agreement_name",
+				fieldtype: "Data",
+				reqd: 1,
 			},
 		]
 	}
