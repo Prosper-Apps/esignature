@@ -84,3 +84,8 @@ class Agreement(AdobeBase):
 		url = f"{self.url}/{id}/events"
 		response = requests.get(url, headers=self.headers)
 		return response.json()
+
+	def get_members(self, id):
+		url = f"{self.url}/{id}/members"
+		response = requests.get(url, headers=self.headers)
+		return response.json()

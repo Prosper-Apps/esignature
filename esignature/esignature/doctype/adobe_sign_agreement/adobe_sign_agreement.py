@@ -106,6 +106,9 @@ class AdobeSignAgreement(Document):
 
 	@frappe.whitelist()
 	def get_signed_document(self):
+		if self.status != "SIGNED":
+			return
+
 		file_name = f"{frappe.scrub(self.agreement_name)}.pdf"
 		if not frappe.db.exists(
 			"File",
@@ -140,6 +143,9 @@ class AdobeSignAgreement(Document):
 
 	@frappe.whitelist()
 	def get_signed_document_url(self):
+		if self.status != "SIGNED":
+			return
+
 		client = Agreement(self.user)
 		response = client.get_combined_documents_url(self.agreement_id)
 		self.db_set("signed_agreement_url", response.get("url"))
@@ -150,12 +156,27 @@ class AdobeSignAgreement(Document):
 		return ROLES.keys()
 
 	def get_signing_urls(self):
-		client = Agreement(self.user)
-		return client.get_signing_urls(self.agreement_id)
+		doc_signing_urls = frappe.parse_json(self.signing_urls) or {}
+		if doc_signing_urls:
+			if not doc_signing_urls.get("code"):
+				return doc_signing_urls
 
-	# def get_events(self):
-	# 	client = Agreement(self.user)
-	# 	events = client.get_events(self.agreement_id)
+		client = Agreement(self.user)
+		signing_urls = client.get_signing_urls(self.agreement_id)
+		self.db_set("signing_urls", frappe.as_json(signing_urls))
+		return signing_urls
+
+	def check_user_status(self, user=None):
+		client = Agreement(self.user)
+		members = client.get_members(self.agreement_id)
+
+		for participantSets in members.get("participantSets"):
+			for memberInfo in participantSets.get("memberInfos"):
+				for user in self.get("users"):
+					if user.email == memberInfo.get("email"):
+						user.db_set("status", participantSets.get("status"))
+
+		self.run_method("on_update")
 
 
 @frappe.whitelist()
@@ -174,53 +195,44 @@ def get_agreements_for_attachments(attachments):
 	for agreement in agreements:
 		doc = frappe.get_doc("Adobe Sign Agreement", agreement.name)
 		agreement["signed_agreement"] = None
-		if doc.status == "SIGNED":
+		agreement["signed_agreement_url"] = doc.get_signed_document_url()
+		signed_agreement = doc.get_signed_document()
+
+		if signed_agreement:
 			agreement["signed_agreement"] = frappe.db.get_value(
-				"File", doc.get_signed_document(), "file_url"
+				"File", signed_agreement, "file_url"
 			)
-			if not agreement["signed_agreement_url"]:
-				agreement["signed_agreement_url"] = doc.get_signed_document_url()
 			filtered_agreements.append(agreement)
-		else:
-			doc_signing_urls = frappe.parse_json(doc.signing_urls)
-			signing_urls = (
-				doc_signing_urls if not doc_signing_urls.get("code") else doc.get_signing_urls()
-			)
-			if signing_urls:
-				if signing_urls != doc_signing_urls:
-					frappe.db.set_value(
-						"Adobe Sign Agreement",
-						agreement.name,
-						"signing_urls",
-						frappe.as_json(signing_urls),
+			continue
+
+		if signing_urls := doc.get_signing_urls():
+			for setinfos in signing_urls.get("signingUrlSetInfos", []):
+				for urlset in setinfos.get("signingUrls", []):
+					if (
+						frappe.session.user == "Administrator"
+						or urlset.get("email") == frappe.session.user
+					):
+						agreement_copy = agreement.copy()
+						agreement_copy["signed_agreement_url"] = urlset.get("esignUrl")
+						if frappe.session.user == "Administrator":
+							agreement_copy[
+								"agreement_name"
+							] = f'{agreement["agreement_name"]} - {urlset.get("email")}'
+
+						if agreement_copy["status"] != "SIGNED":
+							for user in doc.get("users"):
+								if urlset.get("email") == user.email and user.status:
+									agreement_copy["status"] = "PENDING"
+
+						filtered_agreements.append(agreement_copy)
+
+			else:
+				if signing_urls.get("code"):
+					agreement["status"] = "ERROR"
+					agreement["error"] = signing_urls.get("message")
+					agreement["signed_agreement_url"] = frappe.utils.get_url_to_form(
+						"Adobe Sign Agreement", agreement.name
 					)
-				for setinfos in signing_urls.get("signingUrlSetInfos", []):
-					for urlset in setinfos.get("signingUrls", []):
-						if (
-							frappe.session.user == "Administrator"
-							or urlset.get("email") == frappe.session.user
-						):
-							agreement_copy = agreement.copy()
-							agreement_copy["signed_agreement_url"] = urlset.get("esignUrl")
-							if frappe.session.user == "Administrator":
-								agreement_copy[
-									"agreement_name"
-								] = f'{agreement["agreement_name"]} - {urlset.get("email")}'
-
-							if agreement_copy["status"] != "SIGNED":
-								for user in doc.get("users"):
-									if urlset.get("email") == user.email and user.status:
-										agreement_copy["status"] = "PENDING"
-
-							filtered_agreements.append(agreement_copy)
-
-				else:
-					if signing_urls.get("code"):
-						agreement["status"] = "ERROR"
-						agreement["error"] = signing_urls.get("message")
-						agreement["signed_agreement_url"] = frappe.utils.get_url_to_form(
-							"Adobe Sign Agreement", agreement.name
-						)
-						filtered_agreements.append(agreement)
+					filtered_agreements.append(agreement)
 
 	return filtered_agreements

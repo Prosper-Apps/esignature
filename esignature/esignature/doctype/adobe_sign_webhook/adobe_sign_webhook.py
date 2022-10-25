@@ -50,10 +50,4 @@ class AgreementWebhookHandler:
 			self.handle_agreement_action_completed()
 
 	def handle_agreement_action_completed(self):
-		# TODO: Trigger a workflow validation action at the same time
-		if self.data.get("actingUserEmail"):
-			for user in self.agreement.get("users"):
-				if user.email == self.data.get("actingUserEmail"):
-					frappe.db.set_value(
-						"Adobe Sign Agreement Users", user.name, "status", self.data.get("actionType")
-					)
+		self.agreement.run_method("check_user_status")
