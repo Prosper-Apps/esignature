@@ -8,9 +8,28 @@ frappe.ui.form.on('Adobe Settings', {
 				method: "create_webhooks",
 				doc: frm.doc
 			}).then((r) => {
+				if (r.message.id) {
+					frappe.show_alert({
+						indicator: "green",
+						message: __("Webhook created successfully")
+					})
+				} else {
+					frappe.show_alert({
+						indicator: "orange",
+						message: __("An error prevented creating the webhooks correctly")
+					})
+				}
+			})
+		}, __("Actions"))
+
+		frm.add_custom_button(__("Update endpoints"), () => {
+			frm.call({
+				method: "update_endpoints",
+				doc: frm.doc
+			}).then((r) => {
 				console.log(r)
 			})
-		})
+		}, __("Actions"))
 
 		if (frm.doc.enable_adobe_sign && frm.doc.connected_application) {
 			frm.add_custom_button(__("Connect to Adobe"), () => {
@@ -31,7 +50,10 @@ frappe.ui.form.on('Adobe Settings', {
 					method: "revoke_token",
 					doc: frm.doc
 				}).then((r) => {
-					console.log(r)
+					frappe.show_alert({
+						indicator: "green",
+						message: __("Token revoked")
+					})
 				})
 			}, __("Token management"))
 		}

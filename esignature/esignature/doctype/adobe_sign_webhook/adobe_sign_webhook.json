@@ -1,12 +1,15 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:webhook_id",
  "creation": "2022-09-26 14:00:10.142906",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "webhook_id",
+  "status",
+  "error",
   "data"
  ],
  "fields": [
@@ -14,21 +17,40 @@
    "fieldname": "webhook_id",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Webhook ID",
-   "reqd": 1
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "data",
    "fieldtype": "JSON",
-   "label": "Data"
+   "label": "Data",
+   "read_only": 1
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nFailed\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Small Text",
+   "label": "Error",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-26 14:00:10.142906",
+ "modified": "2022-10-25 16:27:56.896130",
  "modified_by": "Administrator",
  "module": "eSignature",
  "name": "Adobe Sign Webhook",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

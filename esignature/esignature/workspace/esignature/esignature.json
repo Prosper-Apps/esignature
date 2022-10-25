@@ -1,7 +1,7 @@
 {
  "charts": [],
  "color": "#449CF0",
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">eSignature</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Adobe Sign Agreement\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Agreements\",\"col\":4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">eSignature</span>\",\"col\":12}},{\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Adobe Sign Agreements\",\"col\":4}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Adobe Sign Agreement\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Agreements\",\"col\":4}}]",
  "creation": "2022-10-24 09:31:29.225325",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -65,14 +65,20 @@
    "type": "Link"
   }
  ],
- "modified": "2022-10-24 09:36:34.703546",
+ "modified": "2022-10-24 15:47:17.560058",
  "modified_by": "Administrator",
  "module": "eSignature",
  "name": "eSignature",
  "owner": "Administrator",
  "parent_page": "Integrations",
  "public": 1,
- "quick_lists": [],
+ "quick_lists": [
+  {
+   "document_type": "Adobe Sign Agreement",
+   "label": "Adobe Sign Agreements",
+   "quick_list_filter": "{\"status\":[\"!=\",\"SIGNED\"]}"
+  }
+ ],
  "roles": [],
  "sequence_id": 40.0,
  "shortcuts": [

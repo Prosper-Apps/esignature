@@ -13,12 +13,48 @@
 	margin-bottom: var(--margin-sm);
 	max-width: 100%;
 
-	.data-pill {
-		background-color: var(--yellow-300);
-		box-shadow: none;
+	&.yellow-pill {
+		.data-pill {
+			background-color: var(--yellow-300);
+			box-shadow: none;
+		}
+	
+		a {
+			color: var(--yellow-50);
+		}
+
+		.icon {
+			--icon-stroke: var(--yellow-50);
+		}
 	}
 
-	a {
-		color: var(--yellow-50);
+	&.green-pill {
+		.data-pill {
+			background-color: var(--green-400);
+			box-shadow: none;
+		}
+	
+		a {
+			color: var(--green-50);
+		}
+
+		.icon {
+			--icon-stroke: var(--green-50);
+		}
+	}
+
+	&.blue-pill {
+		.data-pill {
+			background-color: var(--blue-300);
+			box-shadow: none;
+		}
+	
+		a {
+			color: var(--blue-50);
+		}
+
+		.icon {
+			--icon-stroke: var(--blue-50);
+		}
 	}
 }

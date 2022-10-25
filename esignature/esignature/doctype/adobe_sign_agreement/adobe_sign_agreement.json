@@ -12,9 +12,12 @@
   "user",
   "status",
   "files",
+  "section_break_6",
+  "signing_order",
   "users",
   "agreement_id",
-  "signed_agreement_url"
+  "signed_agreement_url",
+  "signing_urls"
  ],
  "fields": [
   {
@@ -32,33 +35,38 @@
    "in_list_view": 1,
    "label": "User",
    "options": "User",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "files",
    "fieldtype": "Table",
    "label": "Files",
-   "options": "Adobe Sign Agreement Files"
+   "options": "Adobe Sign Agreement Files",
+   "read_only": 1
   },
   {
    "default": "DRAFT",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "OUT_FOR_SIGNATURE\nOUT_FOR_DELIVERY\nOUT_FOR_ACCEPTANCE\nOUT_FOR_FORM_FILLING\nOUT_FOR_APPROVAL\nAUTHORING\nCANCELLED\nSIGNED\nAPPROVED\nDELIVERED\nACCEPTED\nFORM_FILLED\nEXPIRED\nARCHIVED\nPREFILL\nWIDGET_WAITING_FOR_VERIFICATION\nDRAFT\nDOCUMENTS_NOT_YET_PROCESSED\nWAITING_FOR_FAXIN\nWAITING_FOR_VERIFICATION\nWAITING_FOR_NOTARIZATION"
+   "options": "IN_PROCESS\nOUT_FOR_SIGNATURE\nOUT_FOR_DELIVERY\nOUT_FOR_ACCEPTANCE\nOUT_FOR_FORM_FILLING\nOUT_FOR_APPROVAL\nAUTHORING\nCANCELLED\nSIGNED\nAPPROVED\nDELIVERED\nACCEPTED\nFORM_FILLED\nEXPIRED\nARCHIVED\nPREFILL\nWIDGET_WAITING_FOR_VERIFICATION\nDRAFT\nDOCUMENTS_NOT_YET_PROCESSED\nWAITING_FOR_FAXIN\nWAITING_FOR_VERIFICATION\nWAITING_FOR_NOTARIZATION",
+   "read_only": 1
   },
   {
    "fieldname": "agreement_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Agreement Name",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "users",
    "fieldtype": "Table",
    "label": "Users",
-   "options": "Adobe Sign Agreement Users"
+   "options": "Adobe Sign Agreement Users",
+   "read_only": 1
   },
   {
    "fieldname": "agreement_id",
@@ -73,11 +81,28 @@
    "label": "Signed Agreement URL",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "signing_order",
+   "fieldtype": "Check",
+   "label": "Signing order must be respected",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signing_urls",
+   "fieldtype": "Small Text",
+   "label": "Signing URLS",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-06 18:46:05.907132",
+ "modified": "2022-10-25 14:29:19.839874",
  "modified_by": "Administrator",
  "module": "eSignature",
  "name": "Adobe Sign Agreement",

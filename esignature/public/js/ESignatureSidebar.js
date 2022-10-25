@@ -66,33 +66,28 @@ class ESignatureMenu {
 
 		// 3. Show the new URL
 		signed_agreements.map((signed_agreement) => {
+			const pill_icon = ["SIGNED", "PENDING"].includes(signed_agreement.status) ? "milestone" : "edit"
+			const pill_color = signed_agreement.status == "SIGNED" ? "blue-pill" : (signed_agreement.status == "PENDING" ? "green-pill" : "yellow-pill")
+
+			const icon = `<a href="${signed_agreement.signed_agreement_url}" target="_blank">
+				${frappe.utils.icon(pill_icon, "sm ml-0")}
+			</a>`;
+
 			$(`<li class="esignature-menu--agreement-url">`)
 			.append(
 				frappe.get_data_pill(
-					`<a href=${signed_agreement.signed_agreement_url} target="_blank">${signed_agreement.agreement_name}</a>`,
+					`<a href=${signed_agreement.signed_agreement_url} target="_blank" title="${signed_agreement.agreement_name}">${signed_agreement.agreement_name}</a>`,
 					null,
 					null,
-					null
+					icon
 				)
 			)
-			.insertAfter(this.$header);
+			.insertAfter(this.$header)
+			.addClass(pill_color);
 		})
-
-		// Update signed items
-		// 1. Get all signed items
-		const signed_items = await this.list_signed_items_for(attachments)
 
 		// 2. Remove previous buttons
 		this.$menu.find(".esignature-menu--signed-item").remove()
-
-		// 3. List all signed files as buttons
-		signed_items.forEach(f => {
-			const label = f.file_name
-			const $btn = frappe.get_data_pill(label, null, null, null)
-				.wrap("<li></li>").parent()
-				.addClass("esignature-menu--signed-item")
-				.insertAfter(this.$header)
-		})
 	}
 
 	async get_signed_agreement_url(attachments) {
@@ -101,32 +96,7 @@ class ESignatureMenu {
 		)
 	}
 
-	async list_signed_items_for(file_names) {
-		return []
-
-		// const args = {
-		// 	docname: this.frm.docname,
-		// 	attachments: file_names,
-		// }
-		// console.log("finding signed files for:", { args })
-		// const res = await frappe.xcall("esignature.esignature.api.list_signed_items", args)
-
-		// TODO: remove mockup code
-		// return this.frm.attachments.get_attachments().flatMap(a => ([
-		// 	{
-		// 		file_name: "signed_" + a.file_name,
-		// 		file_url: a.file_url,
-		// 		name: "12345678",
-		// 	}, {
-		// 		file_name: "hash_" + a.file_name,
-		// 		file_url: a.file_url,
-		// 		name: "12345678",
-		// 	}
-		// ]))
-	}
-
 	async open_request_modal() {
-		const attachments = this.frm.attachments.get_attachments()
 		const title = __("Request an eSignature")
 		const fields = this.get_modal_fields()
 		const primary_action = (values) => {
@@ -138,7 +108,6 @@ class ESignatureMenu {
 			fields,
 			primary_action,
 			primary_action_label,
-			// TODO: frappe.confirm before closing modal (not possible with dialog.onhide?)
 		})
 		await this.dialog.show()
 		this.setup_attach_file_button()
@@ -168,6 +137,12 @@ class ESignatureMenu {
 				})),
 			},
 			{ fieldtype: "Section Break" },
+			{
+				label: __("Signing order must be respected"),
+				fieldname: "signing_order",
+				fieldtype: "Check",
+				default: 1,
+			},
 			{
 				label: __("Signers"),
 				fieldname: "users",
@@ -213,7 +188,7 @@ class ESignatureMenu {
 	}
 
 	create_an_agreement(values) {
-		console.log(values)
+		this.dialog.disable_primary_action()
 		return frappe.call({
 			method: "frappe.client.insert",
 			args: {
@@ -226,22 +201,29 @@ class ESignatureMenu {
 							file: f
 						}
 					}),
-					users: values.users
+					users: values.users,
+					signing_order: values.signing_order
 				}
 			},
 		}).then(() => {
+			this.dialog.enable_primary_action()
 			this.dialog.hide()
 			frappe.show_alert({
 				message: __("eSignature Request sent. Please check your email Inbox."),
 				indicator: "green"
 			})
+		}).catch(() => {
+			this.dialog.enable_primary_action()
 		})
 	}
 
 	ask_for_new_file() {
 		return new Promise((callback, emitError) => {
 			// frappe/frappe/public/js/frappe/file_uploader/index.js
-			const file_uploader = new frappe.ui.FileUploader({
+			new frappe.ui.FileUploader({
+				doctype: this.frm.doctype,
+				docname: this.frm.docname,
+				frm: this.frm,
 				folder: frappe.boot.attachments_folder,
 				make_attachments_public: false,
 				allow_multiple: false,

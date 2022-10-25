@@ -3,9 +3,31 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import cint
 
 from esignature.api.transientDocuments import transientDocuments
 from esignature.api.agreement import Agreement
+
+# Keep for translations
+# _('Signer'), _('Approver'), _('Acceptor'), _('Certified Recipient'), _('Form Filler')
+# _('Delegate to Signer'), _('Delegate to Approver'), _('Delegate to Acceptor'), _('Delegate to Certified Recipient')
+# _('Delegate to Form Filler'), _('Share'), _('Notary Signer'), _('Electronic Sealer')
+
+ROLES = {
+	"Signer": "SIGNER",
+	"Approver": "APPROVER",
+	"Acceptor": "ACCEPTOR",
+	"Certified Recipient": "CERTIFIED_RECIPIENT",
+	"Form Filler": "FORM_FILLER",
+	"Delegate to Signer": "DELEGATE_TO_SIGNER",
+	"Delegate to Approver": "DELEGATE_TO_APPROVER",
+	"Delegate to Acceptor": "DELEGATE_TO_ACCEPTOR",
+	"Delegate to Certified Recipient": "DELEGATE_TO_CERTIFIED_RECIPIENT",
+	"Delegate to Form Filler": "DELEGATE_TO_FORM_FILLER",
+	"Share": "SHARE",
+	"Notary Signer": "NOTARY_SIGNER",
+	"Electronic Sealer": "ELECTRONIC_SEALER"
+}
 
 class AdobeSignAgreement(Document):
 	def after_insert(self):
@@ -57,8 +79,8 @@ class AdobeSignAgreement(Document):
 						"authenticationMethod": "NONE"
 					}
 				}],
-				"role": user.role,
-				"order": 1
+				"role": ROLES.get(user.role),
+				"order": cint(self.signing_order)
 			})
 
 		if not agreement_data["participantSetsInfo"]:
@@ -81,19 +103,80 @@ class AdobeSignAgreement(Document):
 		if data.get("status") and data.get("status") != self.status:
 			self.db_set("status", data.get("status"))
 
+		if data.get("status") and data.get("status") == "SIGNED":
+			self.get_signed_document()
+			self.get_signed_document_url()
+
 	@frappe.whitelist()
 	def get_signed_document(self):
+		file_name = f"{frappe.scrub(self.agreement_name)}.pdf"
+		if not frappe.db.exists("File", dict(file_name=file_name, attached_to_doctype=self.doctype, attached_to_name=self.name)):
+			client = Agreement(self.user)
+			buffer = client.get_combined_documents(self.agreement_id)
+
+			_file = frappe.get_doc(
+				{
+					"doctype": "File",
+					"file_name": file_name,
+					"attached_to_doctype": self.doctype,
+					"attached_to_name": self.name,
+					"is_private": True,
+					"content": buffer.getbuffer().tobytes(),
+				}
+			)
+			_file.save()
+
+			return _file.name
+
+	@frappe.whitelist()
+	def get_signed_document_url(self):
 		client = Agreement(self.user)
 		response = client.get_combined_documents_url(self.agreement_id)
 		self.db_set("signed_agreement_url", response.get("url"))
 
+	def get_all_roles(self):
+		return ROLES.keys()
+
+	def get_signing_urls(self):
+		client = Agreement(self.user)
+		return client.get_signing_urls(self.agreement_id)
+
+	# def get_events(self):
+	# 	client = Agreement(self.user)
+	# 	events = client.get_events(self.agreement_id)
+
 @frappe.whitelist()
 def get_agreements_for_attachments(attachments):
-	return frappe.get_list("Adobe Sign Agreement",
+	agreements = frappe.get_list("Adobe Sign Agreement",
 		filters=[
-			["Adobe Sign Agreement Files", "file", "in", frappe.parse_json(attachments)],
-			["Adobe Sign Agreement", "signed_agreement_url", "is", "set"]
+			["Adobe Sign Agreement Files", "file", "in", frappe.parse_json(attachments)]
 		],
-		fields=["name", "agreement_name", "signed_agreement_url"],
+		fields=["name", "agreement_name", "signed_agreement_url", "status"],
 		distinct=1
 	)
+
+	filtered_agreements = []
+	for agreement in agreements:
+		if not agreement.signed_agreement_url:
+			doc = frappe.get_doc("Adobe Sign Agreement", agreement.name)
+			signing_urls = frappe.parse_json(doc.signing_urls) or doc.get_signing_urls()
+
+			if signing_urls:
+				if not doc.signing_urls:
+					frappe.db.set_value("Adobe Sign Agreement", agreement.name, "signing_urls", frappe.as_json(signing_urls))
+				for setinfos in signing_urls.get("signingUrlSetInfos", []):
+					for urlset in setinfos.get("signingUrls", []):
+						if frappe.session.user == "Administrator" or urlset.get("email") == frappe.session.user:
+							agreement_copy = agreement.copy()
+							agreement_copy["signed_agreement_url"] = urlset.get("esignUrl")
+							if frappe.session.user == "Administrator":
+								agreement_copy["agreement_name"] = f'{agreement["agreement_name"]} - {urlset.get("email")}'
+
+							if agreement_copy["status"] != "SIGNED":
+								for user in doc.get("users"):
+									if urlset.get("email") == user.email and user.status:
+										agreement_copy["status"] = "PENDING"
+
+							filtered_agreements.append(agreement_copy)
+
+	return filtered_agreements

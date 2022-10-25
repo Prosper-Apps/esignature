@@ -8,23 +8,12 @@ from esignature.api.base import AdobeBase
 from esignature.api.webhook import Webhook
 
 _SCOPES = [
-	"user_read:account",
-	"user_write:account",
-	"user_login:account",
 	"agreement_read:account",
 	"agreement_write:account",
 	"agreement_send:account",
-	"widget_read:account",
-	"widget_write:account",
-	"library_read:account",
-	"library_write:account",
-	"workflow_read:account",
-	"workflow_write:account",
 	"webhook_read:account",
 	"webhook_write:account"
 ]
-
-# TODO: Register api_access_point and web_access_point returned during authorization flow
 
 AGREEMENT_ALL = [
 	"AGREEMENT_ALL"
@@ -33,16 +22,22 @@ AGREEMENT_WEBHOOK_URL = "/api/method/esignature.api.webhook.adobe_webhooks"
 
 class AdobeSettings(Document):
 	def validate(self):
-		connected_app = frappe.get_doc("Connected App", self.connected_application) if self.connected_application else frappe.new_doc("Connected App")
+		if not self.enable_adobe_sign:
+			return
 
+		self.update_endpoints()
+		self.update_connected_app()
+
+	def update_connected_app(self):
+		connected_app = frappe.get_doc("Connected App", self.connected_application) if self.connected_application else frappe.new_doc("Connected App")
 
 		parameters = {
 			"provider_name": "Adobe Sign",
 			"client_id": self.application_code,
 			"client_secret": self.get_password("application_secret", raise_exception=False),
 			"scopes": [],
-			"authorization_uri": f"{self.base_uri}/public/oauth/v2",
-			"token_uri": f"{self.base_uri}/oauth/v2/token"
+			"authorization_uri": f"{self.api_access_point}/public/oauth/v2",
+			"token_uri": f"{self.api_access_point}/oauth/v2/token"
 		}
 
 		connected_app.update(parameters)
@@ -58,6 +53,21 @@ class AdobeSettings(Document):
 			self.connected_application = connected_app.name
 
 		self.redirect_uri = connected_app.redirect_uri
+
+
+	@frappe.whitelist()
+	def update_endpoints(self):
+		connection = AdobeBase()
+		connection.url = self.base_uri + "/api/rest/v6/baseUris"
+		endpoints = connection.get_access_endpoints()
+
+		if self.api_access_point != endpoints.get("apiAccessPoint"):
+			self.api_access_point = endpoints.get("apiAccessPoint")
+			self.db_set("api_access_point", endpoints.get("apiAccessPoint"))
+
+		if self.web_access_point != endpoints.get("webAccessPoint"):
+			self.web_access_point = endpoints.get("webAccessPoint")
+			self.db_set("web_access_point", endpoints.get("webAccessPoint"))
 
 
 	@frappe.whitelist()

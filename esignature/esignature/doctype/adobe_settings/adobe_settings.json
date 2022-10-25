@@ -9,10 +9,14 @@
   "adobe_sign_tab",
   "enable_adobe_sign",
   "base_uri",
+  "api_access_point",
+  "web_access_point",
   "application_code",
   "application_secret",
   "connected_application",
-  "redirect_uri"
+  "redirect_uri",
+  "signature_settings_tab",
+  "x_api_user"
  ],
  "fields": [
   {
@@ -41,9 +45,9 @@
    "mandatory_depends_on": "eval:doc.enable_adobe_sign"
   },
   {
-   "default": "https://secure.eu1.adobesign.com",
+   "default": "https://secure.eu1.adobesign.com/",
    "depends_on": "eval:doc.enable_adobe_sign",
-   "description": "The Adobe Sign endpoint",
+   "description": "The Acrobat Sign endpoint",
    "fieldname": "base_uri",
    "fieldtype": "Data",
    "label": "Base URI",
@@ -63,12 +67,35 @@
    "fieldtype": "Small Text",
    "label": "Redirect URI",
    "read_only": 1
+  },
+  {
+   "fieldname": "api_access_point",
+   "fieldtype": "Data",
+   "label": "API Access Point",
+   "read_only": 1
+  },
+  {
+   "fieldname": "web_access_point",
+   "fieldtype": "Data",
+   "label": "Web Access Point",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Signature Settings"
+  },
+  {
+   "default": "1",
+   "fieldname": "x_api_user",
+   "fieldtype": "Check",
+   "label": "Add an X-API-USER header in requests"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-09-24 09:58:04.137704",
+ "modified": "2022-10-24 16:17:02.463169",
  "modified_by": "Administrator",
  "module": "eSignature",
  "name": "Adobe Settings",

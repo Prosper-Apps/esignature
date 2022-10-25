@@ -2,7 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Adobe Sign Webhook', {
-	// refresh: function(frm) {
-
-	// }
+	refresh: function(frm) {
+		if (frm.doc.status != "Completed") {
+			frm.add_custom_button(__("Retry Webhook"), () => {
+				frappe.call({
+					method: "retry_webhook",
+					doc: frm.doc
+				}).then(() => {
+					frm.refresh()
+				})
+			}, __("Actions"))
+		}
+	}
 });

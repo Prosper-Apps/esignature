@@ -115,23 +115,11 @@ boot_session = "esignature.boot.get_bootinfo"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-#	"all": [
-#		"esignature.tasks.all"
-#	],
-#	"daily": [
-#		"esignature.tasks.daily"
-#	],
-#	"hourly": [
-#		"esignature.tasks.hourly"
-#	],
-#	"weekly": [
-#		"esignature.tasks.weekly"
-#	],
-#	"monthly": [
-#		"esignature.tasks.monthly"
-#	],
-# }
+scheduler_events = {
+	"daily_long": [
+		"esignature.tasks.daily_long"
+	],
+}
 
 # Testing
 # -------
