@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 
+
 class AdobeSignWebhook(Document):
 	def after_insert(self):
 		self.handle_event()
@@ -26,17 +27,22 @@ class AdobeSignWebhook(Document):
 		self.db_set("status", "Pending")
 		return self.handle_event()
 
+
 class AgreementWebhookHandler:
 	def __init__(self, data):
 		self.data = data
 		if agreement_id := data.get("agreement", {}).get("id"):
 			if frappe.db.exists("Adobe Sign Agreement", dict(agreement_id=agreement_id)):
-				self.agreement = frappe.get_doc("Adobe Sign Agreement", dict(agreement_id=agreement_id))
+				self.agreement = frappe.get_doc(
+					"Adobe Sign Agreement", dict(agreement_id=agreement_id)
+				)
 				self.update_status()
 				self.handle_event()
 
 	def update_status(self):
-		if self.data.get("agreement", {}).get("status") and self.agreement.status != self.data.get("agreement", {}).get("status"):
+		if self.data.get("agreement", {}).get(
+			"status"
+		) and self.agreement.status != self.data.get("agreement", {}).get("status"):
 			self.agreement.run_method("update_status")
 
 	def handle_event(self):
@@ -44,8 +50,10 @@ class AgreementWebhookHandler:
 			self.handle_agreement_action_completed()
 
 	def handle_agreement_action_completed(self):
-		# TODO: Trigger a workflow validation action at the same time 
+		# TODO: Trigger a workflow validation action at the same time
 		if self.data.get("actingUserEmail"):
 			for user in self.agreement.get("users"):
 				if user.email == self.data.get("actingUserEmail"):
-					frappe.db.set_value("Adobe Sign Agreement Users", user.name, "status", self.data.get("actionType"))
+					frappe.db.set_value(
+						"Adobe Sign Agreement Users", user.name, "status", self.data.get("actionType")
+					)

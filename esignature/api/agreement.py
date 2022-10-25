@@ -1,19 +1,18 @@
 import json
-import requests
 
 import frappe
+import requests
 from frappe import _
 
 from esignature.api.base import AdobeBase
+
 
 class Agreement(AdobeBase):
 	def __init__(self, user=None):
 		super(Agreement, self).__init__(user)
 
 		self.url = self.api_url + "/api/rest/v6/agreements"
-		self.headers.update({
-			'Content-Type': 'application/json'
-		})
+		self.headers.update({"Content-Type": "application/json"})
 
 	def get(self, id=None):
 		url = f"{self.url}/{id}" if id else self.url
@@ -28,31 +27,29 @@ class Agreement(AdobeBase):
 		"""
 		example:
 		{
-			"id": "<an-adobe-sign-generated-id>",
-			"name": "MyTestAgreement",
-			"participantSetsInfo": [{
-				"memberInfos": [{
-				"email": "signer@somecompany.com",
-				"securityOption": {
-					"authenticationMethod": "NONE"
-				}
-				}],
-				"role": "SIGNER",
-				"order": 1
-			}],
-			"senderEmail": "sender@somecompany.com",
-			"createdDate": "2018-07-23T08:13:16Z",
-			"signatureType": "ESIGN",
-			"locale": "en_US",
-			"status": "OUT_FOR_SIGNATURE",
-			"documentVisibilityEnabled": false
+		        "id": "<an-adobe-sign-generated-id>",
+		        "name": "MyTestAgreement",
+		        "participantSetsInfo": [{
+		                "memberInfos": [{
+		                "email": "signer@somecompany.com",
+		                "securityOption": {
+		                        "authenticationMethod": "NONE"
+		                }
+		                }],
+		                "role": "SIGNER",
+		                "order": 1
+		        }],
+		        "senderEmail": "sender@somecompany.com",
+		        "createdDate": "2018-07-23T08:13:16Z",
+		        "signatureType": "ESIGN",
+		        "locale": "en_US",
+		        "status": "OUT_FOR_SIGNATURE",
+		        "documentVisibilityEnabled": false
 		}
 		"""
 
 		if self.settings.x_api_user:
-			self.headers.update({
-				'x-api-user': f'email: {self.user or frappe.session.user}'
-			})
+			self.headers.update({"x-api-user": f"email: {self.user or frappe.session.user}"})
 
 		response = requests.post(self.url, headers=self.headers, data=json.dumps(data))
 
@@ -62,8 +59,9 @@ class Agreement(AdobeBase):
 			frappe.throw(title=_("Agreement creation issue"), msg=response.text)
 
 	def get_combined_documents(self, id) -> bytes:
-		import shutil
 		import io
+		import shutil
+
 		url = f"{self.url}/{id}/combinedDocument"
 		with requests.get(url, headers=self.headers, stream=True) as r:
 			buffer = io.BytesIO()

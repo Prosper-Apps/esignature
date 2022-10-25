@@ -1,4 +1,4 @@
-from . import __version__ as app_version
+from . import __version__ as app_version  # noqa
 
 app_name = "esignature"
 app_title = "eSignature"
@@ -42,7 +42,7 @@ app_include_js = "esignature.bundle.js"
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }
 
 # Generators
@@ -56,8 +56,8 @@ app_include_js = "esignature.bundle.js"
 
 # add methods and filters to jinja environment
 # jinja = {
-#	"methods": "esignature.utils.jinja_methods",
-#	"filters": "esignature.utils.jinja_filters"
+# 	"methods": "esignature.utils.jinja_methods",
+# 	"filters": "esignature.utils.jinja_filters"
 # }
 
 # Installation
@@ -85,11 +85,11 @@ boot_session = "esignature.boot.get_bootinfo"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-#	"Event": "frappe.desk.doctype.event.event.has_permission",
+# 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
@@ -97,7 +97,7 @@ boot_session = "esignature.boot.get_bootinfo"
 # Override standard doctype classes
 
 # override_doctype_class = {
-#	"ToDo": "custom_app.overrides.CustomToDo"
+# 	"ToDo": "custom_app.overrides.CustomToDo"
 # }
 
 # Document Events
@@ -105,20 +105,18 @@ boot_session = "esignature.boot.get_bootinfo"
 # Hook on document methods and events
 
 # doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
+# 	"*": {
+# 		"on_update": "method",
+# 		"on_cancel": "method",
+# 		"on_trash": "method"
+# 	}
 # }
 
 # Scheduled Tasks
 # ---------------
 
 scheduler_events = {
-	"daily_long": [
-		"esignature.tasks.daily_long"
-	],
+	"daily_long": ["esignature.tasks.daily_long"],
 }
 
 # Testing
@@ -130,7 +128,7 @@ scheduler_events = {
 # ------------------------------
 #
 # override_whitelisted_methods = {
-#	"frappe.desk.doctype.event.event.get_events": "esignature.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "esignature.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
@@ -149,29 +147,29 @@ scheduler_events = {
 # --------------------
 
 # user_data_fields = [
-#	{
-#		"doctype": "{doctype_1}",
-#		"filter_by": "{filter_by}",
-#		"redact_fields": ["{field_1}", "{field_2}"],
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_2}",
-#		"filter_by": "{filter_by}",
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_3}",
-#		"strict": False,
-#	},
-#	{
-#		"doctype": "{doctype_4}"
-#	}
+# 	{
+# 		"doctype": "{doctype_1}",
+# 		"filter_by": "{filter_by}",
+# 		"redact_fields": ["{field_1}", "{field_2}"],
+# 		"partial": 1,
+# 	},
+# 	{
+# 		"doctype": "{doctype_2}",
+# 		"filter_by": "{filter_by}",
+# 		"partial": 1,
+# 	},
+# 	{
+# 		"doctype": "{doctype_3}",
+# 		"strict": False,
+# 	},
+# 	{
+# 		"doctype": "{doctype_4}"
+# 	}
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-#	"esignature.auth.validate"
+# 	"esignature.auth.validate"
 # ]

@@ -4,5 +4,6 @@
 # import frappe
 from frappe.tests.utils import FrappeTestCase
 
+
 class TestAdobeSignAgreementUsers(FrappeTestCase):
 	pass
