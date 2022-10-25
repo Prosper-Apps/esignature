@@ -67,9 +67,12 @@ class ESignatureMenu {
 		// 3. Show the new URL
 		signed_agreements.map((signed_agreement) => {
 			const pill_icon = ["SIGNED", "PENDING"].includes(signed_agreement.status) ? "milestone" : "edit"
-			const pill_color = signed_agreement.status == "SIGNED" ? "blue-pill" : (signed_agreement.status == "PENDING" ? "green-pill" : "yellow-pill")
+			const pill_color = this.get_pill_color(signed_agreement.status)
 
-			const icon = `<a href="${signed_agreement.signed_agreement_url}" target="_blank">
+			const link_to_signed_agreement = signed_agreement.signed_agreement ?
+				encodeURI(signed_agreement.signed_agreement).replace(/#/g, "%23") :
+				signed_agreement.signed_agreement_url
+			const icon = `<a href="${link_to_signed_agreement}" target="_blank">
 				${frappe.utils.icon(pill_icon, "sm ml-0")}
 			</a>`;
 
@@ -88,6 +91,19 @@ class ESignatureMenu {
 
 		// 2. Remove previous buttons
 		this.$menu.find(".esignature-menu--signed-item").remove()
+	}
+
+	get_pill_color(status) {
+		switch(status) {
+			case "PENDING":
+				return "green-pill"
+			case "ERROR":
+				return "red-pill"
+			case "SIGNED":
+				return "blue-pill"
+			default:
+				return "yellow-pill"
+		}
 	}
 
 	async get_signed_agreement_url(attachments) {
@@ -212,6 +228,7 @@ class ESignatureMenu {
 				message: __("eSignature Request sent. Please check your email Inbox."),
 				indicator: "green"
 			})
+			this.frm.sidebar.reload_docinfo();
 		}).catch(() => {
 			this.dialog.enable_primary_action()
 		})
@@ -263,7 +280,7 @@ const extendFormSidebarWithESignature = (baseClass) => class ESignatureSidebar e
 
 	reload_docinfo(callback) {
 		const cb = (...args) => {
-			callback(...args)
+			callback && callback(...args)
 			this.frm.esignature_menu && this.frm.esignature_menu.refresh()
 		}
 		return super.reload_docinfo(cb)

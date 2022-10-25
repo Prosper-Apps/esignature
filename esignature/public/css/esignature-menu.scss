@@ -57,4 +57,19 @@
 			--icon-stroke: var(--blue-50);
 		}
 	}
+
+	&.red-pill {
+		.data-pill {
+			background-color: var(--red-400);
+			box-shadow: none;
+		}
+	
+		a {
+			color: var(--red-50);
+		}
+
+		.icon {
+			--icon-stroke: var(--red-50);
+		}
+	}
 }

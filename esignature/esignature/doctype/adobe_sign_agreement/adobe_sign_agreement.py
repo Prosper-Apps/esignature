@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
+from frappe.desk.form.load import get_attachments
 
 from esignature.api.transientDocuments import transientDocuments
 from esignature.api.agreement import Agreement
@@ -53,6 +54,7 @@ class AdobeSignAgreement(Document):
 		return all(transient_documents_created)
 
 	def create_agreement(self):
+		# TODO: Handle different status, signature types and security
 		agreement_data = {
 			"name": self.agreement_name,
 			"senderEmail": self.user,
@@ -103,10 +105,6 @@ class AdobeSignAgreement(Document):
 		if data.get("status") and data.get("status") != self.status:
 			self.db_set("status", data.get("status"))
 
-		if data.get("status") and data.get("status") == "SIGNED":
-			self.get_signed_document()
-			self.get_signed_document_url()
-
 	@frappe.whitelist()
 	def get_signed_document(self):
 		file_name = f"{frappe.scrub(self.agreement_name)}.pdf"
@@ -124,15 +122,20 @@ class AdobeSignAgreement(Document):
 					"content": buffer.getbuffer().tobytes(),
 				}
 			)
-			_file.save()
+			_file.insert(ignore_permissions=True)
 
 			return _file.name
+
+		else:
+			return frappe.db.get_value("File", dict(file_name=file_name, attached_to_doctype=self.doctype, attached_to_name=self.name))
 
 	@frappe.whitelist()
 	def get_signed_document_url(self):
 		client = Agreement(self.user)
 		response = client.get_combined_documents_url(self.agreement_id)
 		self.db_set("signed_agreement_url", response.get("url"))
+
+		return response.get("url")
 
 	def get_all_roles(self):
 		return ROLES.keys()
@@ -147,6 +150,7 @@ class AdobeSignAgreement(Document):
 
 @frappe.whitelist()
 def get_agreements_for_attachments(attachments):
+	#TODO: Split in several functions
 	agreements = frappe.get_list("Adobe Sign Agreement",
 		filters=[
 			["Adobe Sign Agreement Files", "file", "in", frappe.parse_json(attachments)]
@@ -157,12 +161,18 @@ def get_agreements_for_attachments(attachments):
 
 	filtered_agreements = []
 	for agreement in agreements:
-		if not agreement.signed_agreement_url:
-			doc = frappe.get_doc("Adobe Sign Agreement", agreement.name)
-			signing_urls = frappe.parse_json(doc.signing_urls) or doc.get_signing_urls()
-
+		doc = frappe.get_doc("Adobe Sign Agreement", agreement.name)
+		agreement["signed_agreement"] = None
+		if doc.status == "SIGNED":
+			agreement["signed_agreement"] = frappe.db.get_value("File", doc.get_signed_document(), "file_url")
+			if not agreement["signed_agreement_url"]:
+				agreement["signed_agreement_url"] = doc.get_signed_document_url()
+			filtered_agreements.append(agreement)
+		else:
+			doc_signing_urls = frappe.parse_json(doc.signing_urls)
+			signing_urls = doc_signing_urls if not doc_signing_urls.get("code") else doc.get_signing_urls()
 			if signing_urls:
-				if not doc.signing_urls:
+				if signing_urls != doc_signing_urls:
 					frappe.db.set_value("Adobe Sign Agreement", agreement.name, "signing_urls", frappe.as_json(signing_urls))
 				for setinfos in signing_urls.get("signingUrlSetInfos", []):
 					for urlset in setinfos.get("signingUrls", []):
@@ -178,5 +188,12 @@ def get_agreements_for_attachments(attachments):
 										agreement_copy["status"] = "PENDING"
 
 							filtered_agreements.append(agreement_copy)
+
+				else:
+					if signing_urls.get("code"):
+						agreement["status"] = "ERROR"
+						agreement["error"] = signing_urls.get("message")
+						agreement["signed_agreement_url"] = frappe.utils.get_url_to_form("Adobe Sign Agreement", agreement.name)
+						filtered_agreements.append(agreement)
 
 	return filtered_agreements

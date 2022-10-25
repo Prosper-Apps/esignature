@@ -23,12 +23,8 @@ class Webhook(AdobeBase):
 
 @frappe.whitelist(allow_guest=True)
 def adobe_webhooks():
-	# data = frappe.form_dict()
-	print("WH", frappe.request.headers)
-
 	validation_header = frappe.get_request_header("X-AdobeSign-ClientId") or ""
 	if validation_header and validation_header == frappe.db.get_single_value("Adobe Settings", "application_code"):
-		print(frappe.request)
 		response = Response()
 		response.headers.add(
 			'X-AdobeSign-ClientId', validation_header
