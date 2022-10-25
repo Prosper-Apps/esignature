@@ -4,7 +4,6 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
-from frappe.desk.form.load import get_attachments
 
 from esignature.api.transientDocuments import transientDocuments
 from esignature.api.agreement import Agreement

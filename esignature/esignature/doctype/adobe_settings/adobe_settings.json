@@ -47,7 +47,7 @@
   {
    "default": "https://secure.eu1.adobesign.com/",
    "depends_on": "eval:doc.enable_adobe_sign",
-   "description": "The Acrobat Sign endpoint",
+   "description": "The Adobe Sign endpoint",
    "fieldname": "base_uri",
    "fieldtype": "Data",
    "label": "Base URI",
@@ -95,7 +95,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-10-24 16:17:02.463169",
+ "modified": "2022-10-25 16:17:02.463169",
  "modified_by": "Administrator",
  "module": "eSignature",
  "name": "Adobe Settings",
