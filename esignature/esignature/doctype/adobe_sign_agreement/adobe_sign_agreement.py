@@ -3,10 +3,18 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.model.workflow import apply_workflow, get_workflow_name
 from frappe.utils import cint
 
 from esignature.api.agreement import Agreement
 from esignature.api.transientDocuments import transientDocuments
+
+from frappe.workflow.doctype.workflow_action.workflow_action import (  # isort:skip
+	get_allowed_roles,
+	get_doc_workflow_state,
+	get_next_possible_transitions,
+)
+
 
 # Keep for translations
 # _('Signer'), _('Approver'), _('Acceptor'), _('Certified Recipient'), _('Form Filler')
@@ -167,21 +175,78 @@ class AdobeSignAgreement(Document):
 		return signing_urls
 
 	def check_user_status(self, user=None):
+		if all(user.get("status") == "COMPLETED" for user in self.get("users")):
+			return
+
 		client = Agreement(self.user)
 		members = client.get_members(self.agreement_id)
 
 		for participantSets in members.get("participantSets"):
 			for memberInfo in participantSets.get("memberInfos"):
 				for user in self.get("users"):
-					if user.email == memberInfo.get("email"):
+					if user.email == memberInfo.get("email") and user.status != participantSets.get(
+						"status"
+					):
+						user.status = participantSets.get("status")
 						user.db_set("status", participantSets.get("status"))
 
-		self.run_method("on_update")
+		self.run_method("apply_workflow")
+		self.run_method("before_validate")
+
+	def apply_workflow(self):
+		references = list(
+			set((f.reference_doctype, f.reference_docname) for f in self.get("files"))
+		)
+		references_docs = [frappe.get_doc(f[0], f[1]) for f in references]
+
+		def _apply_workflow(user):
+			for ref_doc in references_docs:
+				try:
+					workflow = get_workflow_name(ref_doc.doctype)
+					workflow_state = get_doc_workflow_state(ref_doc)
+					for next_possible_transition in get_next_possible_transitions(
+						workflow, workflow_state, ref_doc
+					):
+						if get_allowed_roles(
+							user.email, workflow, next_possible_transition.get("next_state")
+						):
+							frappe.enqueue(
+								apply_workflow_for_user,
+								agreement=self,
+								doc=ref_doc,
+								action=next_possible_transition.get("action"),
+								user=user.email,
+								now=True,
+							)
+
+				except Exception:
+					continue
+
+		for user in self.get("users"):
+			if cint(user.workflow_validation) and user.status in (
+				"WAITING_FOR_OTHERS",
+				"COMPLETED",
+			):
+				if frappe.db.exists("User", user.email):
+					_apply_workflow(user)
+
+
+def apply_workflow_for_user(agreement, doc, action, user):
+	connected_user = frappe.session.user
+	try:
+		frappe.set_user(user)
+		apply_workflow(doc, action)
+		agreement.reload()
+		agreement.run_method("apply_workflow")
+		doc.run_method("notify_update")
+	except Exception:
+		pass
+	finally:
+		frappe.set_user(connected_user)
 
 
 @frappe.whitelist()
 def get_agreements_for_attachments(attachments):
-	# TODO: Split in several functions
 	agreements = frappe.get_list(
 		"Adobe Sign Agreement",
 		filters=[
@@ -197,6 +262,7 @@ def get_agreements_for_attachments(attachments):
 		agreement["signed_agreement"] = None
 		agreement["signed_agreement_url"] = doc.get_signed_document_url()
 		signed_agreement = doc.get_signed_document()
+		doc.check_user_status()
 
 		if signed_agreement:
 			agreement["signed_agreement"] = frappe.db.get_value(
@@ -221,7 +287,7 @@ def get_agreements_for_attachments(attachments):
 
 						if agreement_copy["status"] != "SIGNED":
 							for user in doc.get("users"):
-								if urlset.get("email") == user.email and user.status:
+								if urlset.get("email") == user.email and user.status == "WAITING_FOR_OTHERS":
 									agreement_copy["status"] = "PENDING"
 
 						filtered_agreements.append(agreement_copy)

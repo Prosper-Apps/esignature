@@ -132,6 +132,10 @@ class ESignatureMenu {
 	get_modal_fields() {
 		const me = this
 		const attachments = this.frm.attachments.get_attachments()
+		let modal_fields = ["email", "role"]
+		if (frappe.workflow.get_state_fieldname(this.frm.doctype)) {
+			modal_fields.push("workflow_validation")
+		}
 
 		return [
 			{
@@ -166,7 +170,7 @@ class ESignatureMenu {
 				reqd: 1,
 				options: this.doctype_users,
 				fields: frappe.meta.get_docfields(this.doctype_users)
-					.filter(df => df.fieldname === "email" || df.fieldname === "role")
+					.filter(df => modal_fields.includes(df.fieldname))
 					.map(df => {
 						if (df.fieldname === "email") {
 							return {

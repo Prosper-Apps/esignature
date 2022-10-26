@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "file",
+  "reference_doctype",
+  "reference_docname",
   "transient_documents_id"
  ],
  "fields": [
@@ -23,12 +25,30 @@
    "fieldtype": "Small Text",
    "label": "Transient Documents ID",
    "no_copy": 1
+  },
+  {
+   "fetch_from": "file.attached_to_doctype",
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reference Doctype",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "file.attached_to_name",
+   "fieldname": "reference_docname",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Reference Docname",
+   "options": "reference_doctype",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-09-23 15:18:30.245150",
+ "modified": "2022-10-26 09:27:40.874654",
  "modified_by": "Administrator",
  "module": "eSignature",
  "name": "Adobe Sign Agreement Files",

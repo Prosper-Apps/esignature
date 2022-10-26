@@ -9,6 +9,7 @@
   "order",
   "email",
   "role",
+  "workflow_validation",
   "status"
  ],
  "fields": [
@@ -18,6 +19,7 @@
    "label": "Order"
   },
   {
+   "columns": 4,
    "fieldname": "email",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -26,6 +28,7 @@
    "reqd": 1
   },
   {
+   "columns": 4,
    "default": "Signer",
    "fieldname": "role",
    "fieldtype": "Select",
@@ -39,12 +42,20 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "\nCANCELLED\nCOMPLETED\nEXPIRED\nNOT_YET_VISIBLE\nWAITING_FOR_NOTARIZATION\nWAITING_FOR_OTHERS\nWAITING_FOR_MY_APPROVAL\nWAITING_FOR_AUTHORING\nWAITING_FOR_MY_ACKNOWLEDGEMENT\nWAITING_FOR_MY_ACCEPTANCE\nWAITING_FOR_MY_FORM_FILLING\nWAITING_FOR_MY_DELEGATION\nWAITING_FOR_MY_SIGNATURE\nWAITING_FOR_MY_VERIFICATION\nWAITING_FOR_PREFILL"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "workflow_validation",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Workflow Validation"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-25 19:00:02.550097",
+ "modified": "2022-10-26 10:02:48.363755",
  "modified_by": "Administrator",
  "module": "eSignature",
  "name": "Adobe Sign Agreement Users",
