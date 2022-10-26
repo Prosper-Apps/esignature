@@ -64,7 +64,7 @@ app_include_js = "esignature.bundle.js"
 # ------------
 
 # before_install = "esignature.install.before_install"
-# after_install = "esignature.install.after_install"
+after_install = "esignature.install.after_install"
 
 # Uninstallation
 # ------------

@@ -238,9 +238,13 @@ def apply_workflow_for_user(agreement, doc, action, user):
 		apply_workflow(doc, action)
 		agreement.reload()
 		agreement.run_method("apply_workflow")
-		doc.run_method("notify_update")
+		frappe.publish_realtime(
+			"workflow_update_after_signature",
+			doctype=doc.doctype,
+			docname=doc.name,
+		)
 	except Exception:
-		pass
+		frappe.log_error("eSignature Workflow Error", frappe.get_traceback())
 	finally:
 		frappe.set_user(connected_user)
 

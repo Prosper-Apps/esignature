@@ -3,9 +3,16 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Now
 
 
 class AdobeSignWebhook(Document):
+	@staticmethod
+	def clear_old_logs(days=60):
+		table = frappe.qb.DocType("Adobe Sign Webhook")
+		frappe.db.delete(table, filters=(table.modified < (Now() - Interval(days=days))))
+
 	def after_insert(self):
 		self.handle_event()
 
@@ -48,6 +55,15 @@ class AgreementWebhookHandler:
 	def handle_event(self):
 		if self.data.get("event") == "AGREEMENT_ACTION_COMPLETED":
 			self.handle_agreement_action_completed()
+
+		for file in self.agreement.get("files"):
+			if file.reference_doctype and file.reference_docname:
+				frappe.publish_realtime(
+					"agreement_update",
+					doctype=file.reference_doctype,
+					docname=file.reference_docname,
+					after_commit=True,
+				)
 
 	def handle_agreement_action_completed(self):
 		self.agreement.run_method("check_user_status")

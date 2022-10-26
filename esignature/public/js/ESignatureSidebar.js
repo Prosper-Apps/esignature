@@ -299,5 +299,13 @@ const extendFormSidebarWithESignature = (baseClass) => class ESignatureSidebar e
 $(document).ready(() => {
 	if (cint(frappe.boot.adobe_sign_enabled)) {
 		frappe.ui.form.Sidebar = extendFormSidebarWithESignature(frappe.ui.form.Sidebar)
+
+		frappe.realtime.on("agreement_update", () => {
+			cur_frm && cur_frm.sidebar && cur_frm.sidebar.refresh()
+		})
+
+		frappe.realtime.on("workflow_update_after_signature", () => {
+			cur_frm && cur_frm.refresh()
+		})
 	}
 })
